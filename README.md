@@ -1,11 +1,11 @@
-# HFT Market Data Platform
+# HFT Tester
 
 A high-performance, production-grade High-Frequency Trading (HFT) market data platform built in Rust. This platform provides a complete end-to-end trading system with market data processing, strategy execution, risk management, order management, execution simulation, and real-time monitoring.
 
-## 🚀 Overview
+## Overview
 
 This platform is designed for low-latency algorithmic trading, featuring microsecond-level message passing, comprehensive risk controls, and real-time observability. The system is built using a microservices architecture with ZeroMQ for inter-process communication, ensuring high throughput and low latency.
-
+---
 ### Key Features
 
 - **Live Market Data Processing**: Real-time WebSocket data from Binance (BTC-USDT) with order book building (L2 with top 20 levels)
@@ -15,7 +15,7 @@ This platform is designed for low-latency algorithmic trading, featuring microse
 - **Execution Engine**: Simulated exchange matching engine with configurable latency (50-500μs)
 - **Real-Time Monitoring**: Prometheus metrics and modern web-based dashboard with live charts
 - **Security Layer**: JWT-based authentication with role-based access control (optional)
-
+---
 ## 📋 Table of Contents
 
 - [Architecture](#architecture)
@@ -28,55 +28,21 @@ This platform is designed for low-latency algorithmic trading, featuring microse
 - [Project Structure](#project-structure)
 - [Development](#development)
 - [Testing](#testing)
-
-## 🏗️ Architecture
+---
+## Architecture
 
 The platform follows a microservices architecture with the following components:
 
-```
-┌──────────────┐
-│ Market Data  │ (Binance WebSocket → ZeroMQ PUB)
-│              │ Live BTC-USDT @depth20@100ms
-└──────┬───────┘
-       │ Ticks (5555), Books (5556), Candles (5561)
-       ▼
-┌──────────────┐
-│  Strategies  │ (Generates Trading Signals)
-│              │ Market Maker, Mean Reversion, VWAP
-└──────┬───────┘
-       │ Signals (5557)
-       ▼
-┌──────────────┐
-│    Risk      │ (Pre-Trade Risk Checks)
-│              │ Redis-backed limits & kill-switch
-└──────┬───────┘
-       │ Orders (5558)
-       ▼
-┌──────────────┐
-│     OMS      │ (Order State Management)
-│              │ PostgreSQL + Redis cache
-└──────┬───────┘
-       │ Orders (5559)
-       ▼
-┌──────────────┐
-│  Execution   │ (Exchange Simulator)
-│              │ Configurable latency (50-500μs)
-└──────┬───────┘
-       │ Execution Reports (5560)
-       ▼
-┌──────────────┐
-│ Monitoring   │ (Metrics & Dashboard)
-│              │ HTTP:9090, Prometheus metrics
-└──────────────┘
-```
+<img width="2816" height="1536" alt="Gemini_Generated_Image_bxbnd5bxbnd5bxbn" src="https://github.com/user-attachments/assets/e3630f3e-6dc0-4dec-8fef-77b41b31dc81" />
 
+---
 ### Component Communication
 
 - **ZeroMQ PUB-SUB**: Used for one-to-many message distribution (market data, signals, orders)
 - **ZeroMQ REQ-REP**: Used for request-response patterns (risk checks)
 - **Redis**: Shared state storage (positions, risk limits, kill-switch)
 - **PostgreSQL**: Persistent order storage and audit trail
-
+---
 ## 🛠️ Technology Stack
 
 | Component | Technology |
@@ -91,7 +57,7 @@ The platform follows a microservices architecture with the following components:
 | **Authentication** | JWT (jsonwebtoken) |
 | **Serialization** | Serde (JSON) |
 | **Logging** | Tracing / tracing-subscriber |
-
+---
 ## 📦 Installation
 
 ### Prerequisites
@@ -109,7 +75,7 @@ The platform follows a microservices architecture with the following components:
    - Windows: Download from [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
    - Linux: `sudo apt-get install postgresql postgresql-contrib`
    - Mac: `brew install postgresql`
-
+---
 ### Setup Steps
 
 1. **Clone the repository**
@@ -148,7 +114,7 @@ The platform follows a microservices architecture with the following components:
    ```
    
    Note: The platform uses live WebSocket data from Binance, so no CSV files are required for live trading.
-
+---
 ## ⚙️ Configuration
 
 Configuration is managed via `config/platform.toml`. Key settings:
@@ -200,7 +166,7 @@ prometheus_port = 9090
 dashboard_port = 9091
 log_level = "info"
 ```
-
+---
 ## 🚀 Quick Start
 
 ### Windows
@@ -255,7 +221,7 @@ cargo run --release --bin security &
   - Order book visualization
 - **Prometheus Metrics**: http://localhost:9090/metrics
 - **Security Token Service**: http://localhost:9091/token (if security service is running)
-
+---
 ## 🔧 System Components
 
 ### 1. Market Data Handler (`market_data`)
@@ -393,8 +359,7 @@ Authentication and authorization.
 - Token validation
 - Permission checking infrastructure
 
-**Ports:**
-- `9
+---
 
 ## 💻 Development
 
@@ -509,7 +474,7 @@ To integrate with Grafana:
 1. Configure Prometheus to scrape `http://localhost:9090/metrics`
 2. Import dashboards using the Prometheus data source
 3. Monitor real-time performance metrics
-
+---
 ## 🔒 Security Considerations
 
 - **Kill Switch**: Emergency stop mechanism to halt all trading
@@ -518,7 +483,7 @@ To integrate with Grafana:
 - **Daily Loss Limits**: Automatic shutdown on excessive losses
 - **Price Band Validation**: Prevents fat-finger errors
 - **JWT Authentication**: Secure API access (WIP: full implementation)
-
+---
 ## 📝 Notes
 
 - The platform uses **live WebSocket data from Binance** (BTC-USDT) by default.
@@ -527,20 +492,7 @@ To integrate with Grafana:
 - Shared memory ring-buffers could replace ZeroMQ for even lower latency in production.
 - Kafka integration can be added for order replay and debugging.
 - The system is designed for paper trading/simulation. For production use, ensure proper exchange API integration and compliance.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please ensure:
-
-1. Code follows Rust best practices
-2. All tests pass
-3. Documentation is updated
-4. Changes are tested with the full system
-
-## 📄 License
-
-[Specify your license here]
-
+---
 ## 🙏 Acknowledgments
 
 Built with Rust, ZeroMQ, PostgreSQL, Redis, and Prometheus for high-performance algorithmic trading.
@@ -548,4 +500,5 @@ Built with Rust, ZeroMQ, PostgreSQL, Redis, and Prometheus for high-performance 
 ---
 
 **Note**: This platform is designed for educational and development purposes. For production use, ensure proper testing, security hardening, and compliance with applicable regulations.
+
 
