@@ -8,13 +8,13 @@ This platform is designed for low-latency algorithmic trading, featuring microse
 
 ### Key Features
 
-- **Ultra-Fast Market Data Processing**: CSV tick stream replay with order book building (L2 with top 10 levels)
-- **Strategy Engine**: Plugin-based runtime with multiple built-in strategies (Market Maker, Mean Reversion, VWAP)
+- **Live Market Data Processing**: Real-time WebSocket data from Binance (BTC-USDT) with order book building (L2 with top 20 levels)
+- **Strategy Engine**: Plugin-based runtime with multiple built-in strategies (Market Maker, Mean Reversion, VWAP Execution)
 - **Risk Management**: Pre-trade risk controls including position limits, daily loss limits, and kill-switch
 - **Order Management System (OMS)**: PostgreSQL-backed order state management with Redis caching
-- **Execution Engine**: Simulated exchange matching engine with configurable latency
-- **Real-Time Monitoring**: Prometheus metrics and web-based dashboard
-- **Security Layer**: JWT-based authentication with role-based access control
+- **Execution Engine**: Simulated exchange matching engine with configurable latency (50-500μs)
+- **Real-Time Monitoring**: Prometheus metrics and modern web-based dashboard with live charts
+- **Security Layer**: JWT-based authentication with role-based access control (optional)
 
 ## 📋 Table of Contents
 
@@ -35,32 +35,38 @@ The platform follows a microservices architecture with the following components:
 
 ```
 ┌──────────────┐
-│ Market Data  │ (CSV Replay → ZeroMQ PUB)
+│ Market Data  │ (Binance WebSocket → ZeroMQ PUB)
+│              │ Live BTC-USDT @depth20@100ms
 └──────┬───────┘
-       │ Ticks (5555) & Books (5556)
+       │ Ticks (5555), Books (5556), Candles (5561)
        ▼
 ┌──────────────┐
 │  Strategies  │ (Generates Trading Signals)
+│              │ Market Maker, Mean Reversion, VWAP
 └──────┬───────┘
        │ Signals (5557)
        ▼
 ┌──────────────┐
 │    Risk      │ (Pre-Trade Risk Checks)
+│              │ Redis-backed limits & kill-switch
 └──────┬───────┘
        │ Orders (5558)
        ▼
 ┌──────────────┐
 │     OMS      │ (Order State Management)
+│              │ PostgreSQL + Redis cache
 └──────┬───────┘
        │ Orders (5559)
        ▼
 ┌──────────────┐
 │  Execution   │ (Exchange Simulator)
+│              │ Configurable latency (50-500μs)
 └──────┬───────┘
        │ Execution Reports (5560)
        ▼
 ┌──────────────┐
 │ Monitoring   │ (Metrics & Dashboard)
+│              │ HTTP:9090, Prometheus metrics
 └──────────────┘
 ```
 
@@ -136,13 +142,12 @@ The platform follows a microservices architecture with the following components:
    database_url = "postgres://user:password@localhost/hft_oms"
    ```
 
-5. **Prepare Market Data**
-   Ensure you have `data/market_data.csv` and `data/btc.csv` files in the `data/` directory.
-
-6. **Build the Project**
+5. **Build the Project**
    ```bash
    cargo build --release
    ```
+   
+   Note: The platform uses live WebSocket data from Binance, so no CSV files are required for live trading.
 
 ## ⚙️ Configuration
 
@@ -151,9 +156,10 @@ Configuration is managed via `config/platform.toml`. Key settings:
 ### Market Data
 ```toml
 [market_data]
-replay_speed = 1.0  # 1.0 = real-time, 10.0 = 10x speed
 tick_endpoint = "tcp://*:5555"
 book_endpoint = "tcp://*:5556"
+# Uses live Binance WebSocket (BTC-USDT) by default
+# Set USE_BINANCE=false to use Coinbase (requires authentication)
 ```
 
 ### Strategies
@@ -242,25 +248,33 @@ cargo run --release --bin security &
 ### Access Dashboards
 
 - **Monitoring Dashboard**: http://localhost:9090/dashboard
+  - Real-time P&L charts
+  - Latency monitoring
+  - Trade and order history
+  - Strategy performance metrics
+  - Order book visualization
 - **Prometheus Metrics**: http://localhost:9090/metrics
-- **Security Token Service**: http://localhost:9091/token
+- **Security Token Service**: http://localhost:9091/token (if security service is running)
 
 ## 🔧 System Components
 
 ### 1. Market Data Handler (`market_data`)
 
-Processes CSV tick data and builds order books.
+Processes live WebSocket data from Binance and builds order books.
 
 **Features:**
-- CSV tick stream replay with configurable speed
-- L2 order book builder (top 10 levels)
+- Live WebSocket connection to Binance (BTC-USDT)
+- Real-time order book depth updates (@depth20@100ms)
+- L2 order book builder (top 20 levels)
 - ZeroMQ PUB-SUB distribution
 - Nanosecond timestamp precision
 - Latency tracking (exchange vs receive time)
+- Candle generation for technical analysis
 
 **Ports:**
 - `5555`: Tick stream
 - `5556`: Order book snapshots
+- `5561`: Candlestick data
 
 ### 2. Strategy Engine (`strategies`)
 
@@ -350,15 +364,21 @@ Real-time observability and metrics.
 - Backtest API
 
 **Endpoints:**
-- `GET /dashboard`: Web dashboard
+- `GET /dashboard`: Web dashboard with live charts
 - `GET /metrics`: Prometheus metrics
 - `GET /api/positions`: Current positions
 - `GET /api/risk/status`: Risk management status
 - `POST /api/risk/kill-switch`: Activate/deactivate kill-switch
+- `POST /api/risk/limits`: Update risk limits
 - `GET /api/trades`: Recent trades
 - `GET /api/orders`: Recent orders
 - `GET /api/metrics/data`: JSON metrics data
+- `GET /api/pnl`: P&L data for charts
 - `GET /api/backtest`: Run backtests
+- `GET /api/strategies`: Strategy status
+- `POST /api/strategies/control`: Enable/disable strategies
+- `GET /api/candles`: Recent candlestick data
+- `GET /api/orderbook`: Current order book snapshot
 
 **Ports:**
 - `9090`: HTTP server
@@ -501,10 +521,12 @@ To integrate with Grafana:
 
 ## 📝 Notes
 
-- The platform currently uses CSV replay for market data. Live exchange feeds can be integrated.
+- The platform uses **live WebSocket data from Binance** (BTC-USDT) by default.
+- Market data is streamed in real-time with 20-level order book depth updates every 100ms.
 - Python strategy support infrastructure is in place but not fully implemented.
 - Shared memory ring-buffers could replace ZeroMQ for even lower latency in production.
 - Kafka integration can be added for order replay and debugging.
+- The system is designed for paper trading/simulation. For production use, ensure proper exchange API integration and compliance.
 
 ## 🤝 Contributing
 
