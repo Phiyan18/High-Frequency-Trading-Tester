@@ -493,12 +493,13 @@ To integrate with Grafana:
 - Kafka integration can be added for order replay and debugging.
 - The system is designed for paper trading/simulation. For production use, ensure proper exchange API integration and compliance.
 ---
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built with Rust, ZeroMQ, PostgreSQL, Redis, and Prometheus for high-performance algorithmic trading.
 
 ---
 
 **Note**: This platform is designed for educational and development purposes. For production use, ensure proper testing, security hardening, and compliance with applicable regulations.
+
 
 
