@@ -8,7 +8,7 @@ This platform is designed for low-latency algorithmic trading, featuring microse
 ---
 ### Key Features
 
-- **Live Market Data Processing**: Real-time WebSocket data from Binance (BTC-USDT) with order book building (L2 with top 20 levels)
+- **Live Market Data Processing**: Real-time API data from Binance (BTC-USDT) with order book building (L2 with top 20 levels)
 - **Strategy Engine**: Plugin-based runtime with multiple built-in strategies (Market Maker, Mean Reversion, VWAP Execution)
 - **Risk Management**: Pre-trade risk controls including position limits, daily loss limits, and kill-switch
 - **Order Management System (OMS)**: PostgreSQL-backed order state management with Redis caching
