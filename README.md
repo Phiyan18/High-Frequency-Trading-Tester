@@ -16,7 +16,7 @@ This platform is designed for low-latency algorithmic trading, featuring microse
 - **Real-Time Monitoring**: Prometheus metrics and modern web-based dashboard with live charts
 - **Security Layer**: JWT-based authentication with role-based access control (optional)
 ---
-## 📋 Table of Contents
+## Table of Contents
 
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
@@ -167,7 +167,7 @@ dashboard_port = 9091
 log_level = "info"
 ```
 ---
-## 🚀 Quick Start
+## Quick Start
 
 ### Windows
 
@@ -434,7 +434,7 @@ $env:RUST_LOG="debug"
 cargo run --release --bin monitoring
 ```
 
-## 🧪 Testing
+##  Testing
 
 ### Unit Tests
 
@@ -475,7 +475,7 @@ To integrate with Grafana:
 2. Import dashboards using the Prometheus data source
 3. Monitor real-time performance metrics
 ---
-## 🔒 Security Considerations
+## Security Considerations
 
 - **Kill Switch**: Emergency stop mechanism to halt all trading
 - **Rate Limiting**: Prevents runaway strategies
@@ -484,9 +484,9 @@ To integrate with Grafana:
 - **Price Band Validation**: Prevents fat-finger errors
 - **JWT Authentication**: Secure API access (WIP: full implementation)
 ---
-## 📝 Notes
+##Notes
 
-- The platform uses **live WebSocket data from Binance** (BTC-USDT) by default.
+- The platform uses **live API data from Binance** (BTC-USDT) by default.
 - Market data is streamed in real-time with 20-level order book depth updates every 100ms.
 - Python strategy support infrastructure is in place but not fully implemented.
 - Shared memory ring-buffers could replace ZeroMQ for even lower latency in production.
